@@ -106,6 +106,7 @@ The project sets text and colour of `ui_header_status`. Call `display_register_a
 ## Look and Behavior
 
 - Palette: page `0x101418`, header and cards `0x171D23`, buttons and dialog panels `0x202830`, borders `0x303A44` / `0x4A5662`, labels `0x8B96A0`, values `0xFFFFFF`, disabled `0x161B20` / `0x68727B`, selected `0x36505A` / `0x5CFF7A`.
+- `style_page`, `style_card` and `style_dialog_panel` set the text colour `0xFFFFFF`, which labels without their own colour or style inherit.
 - Card radius 12, button radius 8, dialog panel radius 10. Dialogs are full-screen overlays (`style_dialog_overlay`) with a centred `style_dialog_panel`.
 - After `display_idle_timeout` without touch or motion, LVGL pauses and the backlight turns off. The next touch only wakes the display; the control underneath is not operated.
 - The header battery reading is red below 3.50 V, yellow from 3.50 V to below 3.70 V and green from 3.70 V. The thresholds are hints, not a protection.

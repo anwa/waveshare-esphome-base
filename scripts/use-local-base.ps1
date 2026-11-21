@@ -49,9 +49,9 @@ $filesLine = Select-String -LiteralPath $PackageFile -Pattern '^\s*files:\s*\[(.
 if (-not $filesLine) {
     throw "No single-line 'files: [...]' entry found in $Package."
 }
-$files = $filesLine.Matches[0].Groups[1].Value -split ',' |
+$files = @($filesLine.Matches[0].Groups[1].Value -split ',' |
     ForEach-Object { $_.Trim().Trim('"', "'") } |
-    Where-Object { $_ }
+    Where-Object { $_ })
 
 foreach ($file in $files) {
     if (-not (Test-Path -LiteralPath (Join-Path $BaseRoot $file) -PathType Leaf)) {
