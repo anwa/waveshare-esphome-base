@@ -1,0 +1,8 @@
+# Local credentials, Python environment and ESPHome build/download caches.
+secrets.yaml
+.venv/
+.esphome/
+__pycache__/
+
+# Generated local-development package entry files.
+*.local.yaml
