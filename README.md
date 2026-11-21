@@ -49,7 +49,7 @@ The root configuration pins the tag and includes the package file through a subs
 
 ```yaml
 substitutions:
-  waveshare_base_ref: v1.0.0
+  waveshare_base_ref: v1.0.1
   waveshare_base_package: packages/waveshare-base.yaml
 
   firmware_version: "1.2.3"
