@@ -53,11 +53,14 @@ lvgl:
     # MAIN PAGE BACKGROUND
     # ---------------------------------------------------------------------------
 
+    # Text colour is inherited, so labels without their own colour or style
+    # show as values on pages, cards and dialog panels.
     - id: style_page
       bg_color: 0x101418
       bg_opa: COVER
       border_width: 0
       pad_all: 0
+      text_color: 0xFFFFFF
 
     # ---------------------------------------------------------------------------
     # PERSISTENT TOP HEADER
@@ -99,6 +102,7 @@ lvgl:
       border_width: 1
       radius: 12
       pad_all: 0
+      text_color: 0xFFFFFF
 
     # ---------------------------------------------------------------------------
     # GENERIC CONTENT BUTTON
@@ -139,6 +143,7 @@ lvgl:
       border_width: 2
       radius: 10
       pad_all: 0
+      text_color: 0xFFFFFF
 
     # ---------------------------------------------------------------------------
     # DIALOG ACTION BUTTON

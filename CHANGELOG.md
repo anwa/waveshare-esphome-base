@@ -17,3 +17,8 @@ All notable changes to this project are documented in this file. The project use
 - Optional Home Assistant motion source for display wake and keep-awake.
 - `example.yaml`, which builds the base on its own.
 - `scripts/use-local-base.ps1` for developing a project against a local working tree of the base.
+- Default text colour `0xFFFFFF` for pages, cards and dialog panels, inherited by labels without their own colour.
+
+### Fixed
+
+- `scripts/use-local-base.ps1` no longer fails when the package file lists a single base file.
