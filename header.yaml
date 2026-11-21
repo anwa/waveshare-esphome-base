@@ -1,0 +1,164 @@
+# ==============================================================================
+# PERSISTENT HEADER
+# ==============================================================================
+#
+# Defines the 800x58 header shown on top of every page and updates its clock
+# and local backup-battery reading.
+#
+# Layout from left to right:
+#   - product title
+#   - firmware version
+#   - centred clock
+#   - local backup-battery voltage
+#   - project status slot (ui_header_status)
+#
+# The status slot is owned by the consuming project, which sets its text and
+# colour, for example the charger run state or the Home Assistant connection.
+#
+# Required substitutions:
+#   ui_header_title          product name
+#   firmware_version         project firmware version
+#
+# Optional substitutions:
+#   ui_local_battery_label   battery label prefix (default "HMI")
+#   ui_header_status_width   width of the status slot in pixels (default 100)
+#
+# Required IDs:
+#   sntp_time                time source of the clock
+# ==============================================================================
+
+substitutions:
+  ui_local_battery_label: "HMI"
+  ui_header_status_width: "100"
+
+  # The battery label ends 5 px left of the status slot, which keeps a 20 px
+  # right margin.
+  ui_header_battery_x: ${ -(25 + (ui_header_status_width | int)) }
+
+lvgl:
+  top_layer:
+    widgets:
+      - obj:
+          id: ui_header
+          x: 0
+          y: 0
+          width: 800
+          height: 58
+          styles: style_header
+          scrollable: false
+
+          widgets:
+            - label:
+                x: 20
+                align: LEFT_MID
+                text: "${ui_header_title}"
+                text_font: font_20
+                text_color: 0xFFFFFF
+
+            - label:
+                x: 180
+                align: LEFT_MID
+                text: "v${firmware_version}"
+                text_font: font_18
+                text_color: 0x8B96A0
+
+            - label:
+                id: ui_header_clock
+                x: 0
+                align: CENTER
+                width: 200
+                text_align: CENTER
+                text: "--.--.----  --:--"
+                text_font: font_18
+                text_color: 0xDDE3E8
+
+            - label:
+                id: ui_header_battery
+                x: ${ui_header_battery_x}
+                align: RIGHT_MID
+                width: 130
+                text_align: RIGHT
+                text: "${ui_local_battery_label} --.-- V"
+                text_font: font_16
+                text_color: 0x8B96A0
+
+            - label:
+                id: ui_header_status
+                x: -20
+                align: RIGHT_MID
+                width: ${ui_header_status_width}
+                text_align: RIGHT
+                text: ""
+                text_font: font_18
+                text_color: 0x8B96A0
+
+interval:
+
+  # ---------------------------------------------------------------------------
+  # CLOCK
+  # ---------------------------------------------------------------------------
+  #
+  # The clock shows minutes, so a 10-second refresh is sufficient.
+  # ---------------------------------------------------------------------------
+
+  - interval: 10s
+    then:
+      - lvgl.label.update:
+          id: ui_header_clock
+
+          text: !lambda |-
+            auto now = id(sntp_time).now();
+
+            if (!now.is_valid()) {
+              return std::string("--.--.----  --:--");
+            }
+
+            return str_sprintf(
+              "%02d.%02d.%04d  %02d:%02d",
+              now.day_of_month,
+              now.month,
+              now.year,
+              now.hour,
+              now.minute
+            );
+
+  # ---------------------------------------------------------------------------
+  # LOCAL BACKUP BATTERY
+  # ---------------------------------------------------------------------------
+  #
+  # Colour thresholds are hints, not a protection:
+  #   below 3.50 V        red
+  #   3.50 V to 3.70 V    yellow
+  #   from 3.70 V         green
+  # ---------------------------------------------------------------------------
+
+  - interval: 5s
+    then:
+      - lvgl.label.update:
+          id: ui_header_battery
+
+          text: !lambda |-
+            const float voltage = id(local_backup_battery_voltage).state;
+
+            if (std::isnan(voltage)) {
+              return std::string("${ui_local_battery_label} --.-- V");
+            }
+
+            return str_sprintf("${ui_local_battery_label} %.2f V", voltage);
+
+          text_color: !lambda |-
+            const float voltage = id(local_backup_battery_voltage).state;
+
+            if (std::isnan(voltage)) {
+              return lv_color_hex(0x8B96A0);
+            }
+
+            if (voltage < 3.50f) {
+              return lv_color_hex(0xFF3030);
+            }
+
+            if (voltage < 3.70f) {
+              return lv_color_hex(0xFFC04A);
+            }
+
+            return lv_color_hex(0x5CFF7A);

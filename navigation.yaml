@@ -1,0 +1,32 @@
+# ==============================================================================
+# BOTTOM NAVIGATION GEOMETRY
+# ==============================================================================
+#
+# Derives the size and positions of equally sized bottom navigation buttons
+# from their number. The buttons themselves are declared by the consuming
+# project, because each project owns its pages and click behaviour.
+#
+# Geometry: 10 px outer margin, 12 px gap, button row at y 410 with height 58.
+# The button width is rounded down; the row is centred on the 800 px screen.
+#
+# Required substitutions:
+#   ui_nav_count   number of navigation buttons
+#
+# Provided substitutions, for use in the project's button declarations:
+#   ui_nav_y        y position of every button
+#   ui_nav_height   button height
+#   ui_nav_width    button width
+#   ui_nav_x0       x position of the first button
+#   ui_nav_step     x distance between neighbouring buttons
+#
+# Button i (0-based) is placed at x: ${ ui_nav_x0 + i * ui_nav_step }.
+# Use style_nav_button for the button and waveshare_ui::set_active_button()
+# to mark the active page.
+# ==============================================================================
+
+substitutions:
+  ui_nav_y: "410"
+  ui_nav_height: "58"
+  ui_nav_width: ${ (780 - 12 * ((ui_nav_count | int) - 1)) // (ui_nav_count | int) }
+  ui_nav_step: ${ (ui_nav_width | int) + 12 }
+  ui_nav_x0: ${ (800 - (ui_nav_count | int) * (ui_nav_width | int) - 12 * ((ui_nav_count | int) - 1)) // 2 }

@@ -1,0 +1,71 @@
+# ==============================================================================
+# SHARED FONTS
+# ==============================================================================
+#
+# Roboto 500 in every size used by the shared UI. The built-in Montserrat fonts
+# have no umlauts, so German UI text needs these custom fonts.
+#
+# Google Fonts are downloaded at build time, never by the running display.
+# Every size carries the same glyph set: the Latin kernel plus German umlauts
+# and the typographic symbols used by the projects.
+#
+# Font IDs name the pixel size: font_14, font_16, font_18, font_20, font_24,
+# font_28, font_32 and font_48.
+# ==============================================================================
+
+font:
+  - file: gfonts://Roboto@500
+    id: font_14
+    size: 14
+    bpp: 4
+    glyphsets: [GF_Latin_Kernel]
+    glyphs: ["ÄÖÜäöüß°€…–·"]
+
+  - file: gfonts://Roboto@500
+    id: font_16
+    size: 16
+    bpp: 4
+    glyphsets: [GF_Latin_Kernel]
+    glyphs: ["ÄÖÜäöüß°€…–·"]
+
+  - file: gfonts://Roboto@500
+    id: font_18
+    size: 18
+    bpp: 4
+    glyphsets: [GF_Latin_Kernel]
+    glyphs: ["ÄÖÜäöüß°€…–·"]
+
+  - file: gfonts://Roboto@500
+    id: font_20
+    size: 20
+    bpp: 4
+    glyphsets: [GF_Latin_Kernel]
+    glyphs: ["ÄÖÜäöüß°€…–·"]
+
+  - file: gfonts://Roboto@500
+    id: font_24
+    size: 24
+    bpp: 4
+    glyphsets: [GF_Latin_Kernel]
+    glyphs: ["ÄÖÜäöüß°€…–·"]
+
+  - file: gfonts://Roboto@500
+    id: font_28
+    size: 28
+    bpp: 4
+    glyphsets: [GF_Latin_Kernel]
+    glyphs: ["ÄÖÜäöüß°€…–·"]
+
+  - file: gfonts://Roboto@500
+    id: font_32
+    size: 32
+    bpp: 4
+    glyphsets: [GF_Latin_Kernel]
+    glyphs: ["ÄÖÜäöüß°€…–·"]
+
+  - file: gfonts://Roboto@500
+    id: font_48
+    size: 48
+    bpp: 4
+    glyphsets: [GF_Latin_Kernel]
+    glyphs: ["ÄÖÜäöüß°€…–·"]

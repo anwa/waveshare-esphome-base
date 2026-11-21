@@ -1,0 +1,45 @@
+# ==============================================================================
+# WAVESHARE ESP32-S3-TOUCH-LCD-7 BASE PACKAGE
+# ==============================================================================
+#
+# Entry point of the shared base for every HMI on the Waveshare
+# ESP32-S3-Touch-LCD-7 (800x480, GT911, CH422G).
+#
+# Composes the board, display, local backup battery, fonts, theme, persistent
+# header, navigation geometry and chart support. Pages, Home Assistant imports,
+# command backends and network services stay in the consuming project.
+#
+# Required substitutions from the consuming project:
+#   firmware_version        project firmware version shown in the header
+#   ui_header_title         product name shown at the left of the header
+#   battery_entity_prefix   name prefix of the local battery entities
+#   ui_nav_count            number of bottom navigation buttons
+#
+# Required IDs from the consuming project:
+#   sntp_time               time source of the header clock
+#
+# The C++ helpers are provided by the waveshare_ui external component, which
+# the consuming project declares together with this package.
+# ==============================================================================
+
+substitutions:
+
+  # Single source of truth for the base version. Release tags use the same
+  # value as vMAJOR.MINOR.PATCH.
+  waveshare_base_version: "1.0.0-rc.1"
+
+esphome:
+  min_version: 2026.11.0
+
+packages:
+  waveshare_board: !include board.yaml
+  waveshare_display: !include display.yaml
+  waveshare_battery: !include battery.yaml
+  waveshare_fonts: !include fonts.yaml
+  waveshare_theme: !include theme.yaml
+  waveshare_header: !include header.yaml
+  waveshare_navigation: !include navigation.yaml
+  waveshare_charts: !include charts.yaml
+
+# Loads the shared C++ helpers into every generated translation unit.
+waveshare_ui:

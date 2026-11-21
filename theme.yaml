@@ -1,0 +1,209 @@
+# ==============================================================================
+# SHARED LVGL THEME
+# ==============================================================================
+#
+# Dark palette, widget states and named styles shared by every Waveshare HMI.
+#
+# Palette:
+#   page background            0x101418
+#   header and cards           0x171D23
+#   buttons and dialog panels  0x202830
+#   borders                    0x303A44, emphasised 0x4A5662
+#   labels                     0x8B96A0
+#   values                     0xFFFFFF
+#   disabled                   background 0x161B20, text 0x68727B
+#   selected                   background 0x36505A, text 0x5CFF7A
+#
+# Shapes: card radius 12, button radius 8, dialog panel radius 10.
+# ==============================================================================
+
+lvgl:
+  theme:
+    button:
+      pressed:
+        bg_color: 0x3A4652
+
+      # Selected state, for example the active navigation button or an active
+      # tab. Set through LV_STATE_CHECKED.
+      checked:
+        bg_color: 0x36505A
+        bg_opa: COVER
+        text_color: 0x5CFF7A
+
+      disabled:
+        # Keep disabled buttons visually muted without the additional LVGL
+        # default-theme filter brightening the configured colors.
+        bg_color: 0x161B20
+        bg_opa: COVER
+        border_color: 0x2C353D
+        border_opa: COVER
+        text_color: 0x68727B
+        color_filter_opa: TRANSP
+        recolor_opa: TRANSP
+
+    spinbox:
+      cursor:
+        bg_color: 0x3A4652
+        bg_opa: COVER
+        text_color: 0xFFFFFF
+
+  style_definitions:
+
+    # ---------------------------------------------------------------------------
+    # MAIN PAGE BACKGROUND
+    # ---------------------------------------------------------------------------
+
+    - id: style_page
+      bg_color: 0x101418
+      bg_opa: COVER
+      border_width: 0
+      pad_all: 0
+
+    # ---------------------------------------------------------------------------
+    # PERSISTENT TOP HEADER
+    # ---------------------------------------------------------------------------
+
+    - id: style_header
+      bg_color: 0x171D23
+      bg_opa: COVER
+      border_width: 0
+      radius: 0
+      pad_all: 0
+
+    # ---------------------------------------------------------------------------
+    # BOTTOM NAVIGATION BUTTONS
+    # ---------------------------------------------------------------------------
+    #
+    # Size follows the navigation geometry in navigation.yaml.
+    # ---------------------------------------------------------------------------
+
+    - id: style_nav_button
+      width: ${ui_nav_width}
+      height: ${ui_nav_height}
+      bg_color: 0x202830
+      bg_opa: COVER
+      border_color: 0x3B4652
+      border_width: 1
+      radius: 8
+      text_color: 0xDDE3E8
+      text_font: font_18
+
+    # ---------------------------------------------------------------------------
+    # GENERIC CONTENT CARD
+    # ---------------------------------------------------------------------------
+
+    - id: style_card
+      bg_color: 0x171D23
+      bg_opa: COVER
+      border_color: 0x303A44
+      border_width: 1
+      radius: 12
+      pad_all: 0
+
+    # ---------------------------------------------------------------------------
+    # GENERIC CONTENT BUTTON
+    # ---------------------------------------------------------------------------
+
+    - id: style_button
+      bg_color: 0x202830
+      bg_opa: COVER
+      border_color: 0x3B4652
+      border_width: 1
+      radius: 8
+      text_color: 0xDDE3E8
+      shadow_width: 0
+
+    # ---------------------------------------------------------------------------
+    # MODAL DIALOG OVERLAY
+    # ---------------------------------------------------------------------------
+    #
+    # Applied to a full-screen 800x480 object that blocks input to the page
+    # below and carries the centred dialog panel.
+    # ---------------------------------------------------------------------------
+
+    - id: style_dialog_overlay
+      bg_color: 0x000000
+      bg_opa: 55%
+      border_width: 0
+      radius: 0
+      pad_all: 0
+
+    # ---------------------------------------------------------------------------
+    # DIALOG PANEL
+    # ---------------------------------------------------------------------------
+
+    - id: style_dialog_panel
+      bg_color: 0x202830
+      bg_opa: COVER
+      border_color: 0x4A5662
+      border_width: 2
+      radius: 10
+      pad_all: 0
+
+    # ---------------------------------------------------------------------------
+    # DIALOG ACTION BUTTON
+    # ---------------------------------------------------------------------------
+
+    - id: style_dialog_button
+      width: 140
+      height: 50
+      bg_color: 0x202830
+      bg_opa: COVER
+      border_color: 0x4A5662
+      border_width: 1
+      radius: 8
+      text_color: 0xFFFFFF
+      text_font: font_16
+
+    # ---------------------------------------------------------------------------
+    # DIALOG STEP BUTTON
+    # ---------------------------------------------------------------------------
+
+    - id: style_dialog_step_button
+      width: 50
+      height: 50
+      bg_color: 0x202830
+      bg_opa: COVER
+      border_color: 0x4A5662
+      border_width: 1
+      radius: 8
+      text_color: 0xFFFFFF
+      text_font: font_20
+
+    # ---------------------------------------------------------------------------
+    # DIALOG SPINBOX
+    # ---------------------------------------------------------------------------
+
+    - id: style_dialog_spinbox
+      bg_color: 0x171D23
+      bg_opa: COVER
+      border_color: 0x4A5662
+      border_width: 1
+      radius: 8
+      text_color: 0xFFFFFF
+      text_font: font_18
+
+    # ---------------------------------------------------------------------------
+    # TITLE LABEL
+    # ---------------------------------------------------------------------------
+
+    - id: style_title_label
+      text_color: 0x8B96A0
+      text_font: font_18
+
+    # ---------------------------------------------------------------------------
+    # DESCRIPTION LABEL
+    # ---------------------------------------------------------------------------
+
+    - id: style_desc_label
+      text_color: 0x8B96A0
+      text_font: font_14
+
+    # ---------------------------------------------------------------------------
+    # VALUE LABEL
+    # ---------------------------------------------------------------------------
+
+    - id: style_value_label
+      text_color: 0xFFFFFF
+      text_font: font_18
+      text_align: RIGHT

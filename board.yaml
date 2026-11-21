@@ -1,0 +1,99 @@
+# ==============================================================================
+# WAVESHARE BOARD PLATFORM
+# ==============================================================================
+#
+# Defines the ESP32-S3 N16R8 platform and the onboard peripherals shared by
+# every Waveshare ESP32-S3-Touch-LCD-7 project.
+#
+# Included hardware:
+#   - ESP32-S3 with 16 MB QIO flash
+#   - 8 MB octal PSRAM
+#   - onboard I2C bus
+#   - CH422G I/O expander
+#
+# Optional substitutions:
+#   pin_i2c_sda   onboard I2C data pin (default GPIO8)
+#   pin_i2c_scl   onboard I2C clock pin (default GPIO9)
+# ==============================================================================
+
+substitutions:
+  pin_i2c_sda: "GPIO8"
+  pin_i2c_scl: "GPIO9"
+
+esp32:
+  variant: esp32s3
+
+  flash_size: 16MB
+  flash_mode: qio
+
+  # Waveshare recommends 120 MHz Flash and PSRAM for maximum display/LVGL
+  # performance on this board. The current ESPHome/ESP-IDF configuration rejects
+  # 120 MHz with octal PSRAM ("PSRAM 120MHz is not supported in octal mode").
+  #
+  # Do not force this through experimental sdkconfig options while ESPHome does
+  # not support the configuration cleanly. Re-evaluate 120 MHz Flash/PSRAM when
+  # stable ESPHome support becomes available.
+  flash_frequency: 80MHz
+
+  cpu_frequency: 240MHz
+
+  toolchain: esp-idf
+
+  framework:
+    type: esp-idf
+    version: recommended
+    advanced:
+      execute_from_psram: true
+      compiler_optimization: PERF
+    sdkconfig_options:
+      CONFIG_ESP32S3_DATA_CACHE_LINE_64B: y
+
+# ==============================================================================
+# EXTERNAL PSRAM
+# ==============================================================================
+#
+# Enables the ESP32-S3 N16R8 module's 8 MB octal PSRAM at 80 MHz.
+#
+# LVGL framebuffer allocations and other large runtime buffers may use this
+# external memory.
+# ==============================================================================
+
+psram:
+  mode: octal
+
+  # Keep this aligned with the flash frequency above.
+  speed: 80MHz
+
+  ignore_not_found: false
+
+# ==============================================================================
+# ONBOARD I2C BUS
+# ==============================================================================
+#
+# Shared by the GT911 touch controller, the CH422G I/O expander and external
+# I2C devices connected to the onboard bus.
+# ==============================================================================
+
+i2c:
+  - id: board_i2c
+    sda: ${pin_i2c_sda}
+    scl: ${pin_i2c_scl}
+    scan: true
+    frequency: 400kHz
+
+# ==============================================================================
+# CH422G I/O EXPANDER
+# ==============================================================================
+#
+# Onboard expander outputs:
+#   EXIO1 -> GT911 touch reset
+#   EXIO2 -> display backlight enable
+#   EXIO5 -> USB/CAN select on the shared GPIO19/GPIO20 (low = USB, high = CAN)
+#   EXIO6 -> LCD enable
+#
+# EXIO5 is project-specific and is configured only by projects that use CAN.
+# ==============================================================================
+
+ch422g:
+  - id: io_expander
+    i2c_id: board_i2c
