@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file. The project use
 
 ## Unreleased
 
+## [1.0.0] - 2026-11-21
+
 ### Added
 
 - Board package for the Waveshare ESP32-S3-Touch-LCD-7: ESP32-S3 N16R8 platform, octal PSRAM at 80 MHz, onboard I2C bus and CH422G expander.
