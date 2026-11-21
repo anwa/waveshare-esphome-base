@@ -25,7 +25,7 @@ inline void set_active_button(std::initializer_list<lv_obj_t *> buttons, int act
 // Applies the shared trend-chart look: dark plot area without border or
 // padding, palette grid lines, 2 px series lines and no point markers.
 inline void apply_chart_style(lv_obj_t *chart) {
-  lv_obj_remove_flag(chart, LV_OBJ_FLAG_SCROLLABLE);
+  lv_obj_set_scrollable(chart, false);
   lv_obj_set_style_bg_color(chart, lv_color_hex(0x11171C), LV_PART_MAIN);
   lv_obj_set_style_bg_opa(chart, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_border_width(chart, 0, LV_PART_MAIN);

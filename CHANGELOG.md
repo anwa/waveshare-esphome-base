@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file. The project use
 
 ## Unreleased
 
+### Fixed
+
+- `apply_chart_style()` disables scrolling with `lv_obj_set_scrollable()` instead of the deprecated `lv_obj_remove_flag()`, which caused a compiler warning in every project.
+
 ## [1.0.0] - 2026-11-21
 
 ### Added
