@@ -1,0 +1,263 @@
+# ==============================================================================
+# WAVESHARE BASE EXAMPLE
+# ==============================================================================
+#
+# Minimal configuration that compiles the base on its own. It uses the local
+# package files and the local waveshare_ui component of this repository and
+# shows the project-side pieces a consuming project provides:
+#   - required substitutions
+#   - network services with sntp_time and native_api
+#   - pages and bottom navigation buttons
+#   - a modal dialog and a trend chart using the shared helpers
+#
+# The Wi-Fi credentials are dummy values; the example is for validation and
+# compilation only.
+# ==============================================================================
+
+substitutions:
+  firmware_version: "0.0.0"
+  ui_header_title: "Waveshare Base"
+  battery_entity_prefix: "HMI"
+  ui_nav_count: "4"
+  display_motion_entity: "binary_sensor.example_motion"
+
+packages:
+  waveshare_base: !include base.yaml
+  waveshare_motion: !include optional/ha-motion.yaml
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [waveshare_ui]
+
+esphome:
+  name: waveshare-base-example
+  friendly_name: Waveshare Base Example
+
+# ==============================================================================
+# PROJECT NETWORK SERVICES
+# ==============================================================================
+
+logger:
+  level: DEBUG
+
+api:
+  id: native_api
+  reboot_timeout: 0s
+
+wifi:
+  ssid: "example-ssid"
+  password: "example-password"
+  power_save_mode: none
+  reboot_timeout: 0s
+
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: Europe/Berlin
+
+# ==============================================================================
+# PROJECT UI
+# ==============================================================================
+
+globals:
+  - id: example_active_page
+    type: int
+    restore_value: false
+    initial_value: "0"
+
+script:
+  - id: example_select_page
+    parameters:
+      page: int
+    then:
+      - lambda: |-
+          id(example_active_page) = page;
+          waveshare_ui::set_active_button(
+            {id(nav_overview), id(nav_trends), id(nav_settings), id(nav_system)},
+            page
+          );
+
+  - id: example_render_trend
+    then:
+      - lambda: |-
+          // Three channels, 60 points, one sample every 10 seconds.
+          static waveshare_ui::TrendBuffer<60, 3, 10000> history;
+          static lv_obj_t *chart = nullptr;
+          static lv_chart_series_t *series = nullptr;
+
+          if (chart == nullptr) {
+            chart = lv_chart_create(id(example_chart_host));
+            lv_obj_set_pos(chart, 20, 20);
+            lv_obj_set_size(chart, 720, 260);
+            lv_chart_set_type(chart, LV_CHART_TYPE_LINE);
+            lv_chart_set_point_count(chart, history.points);
+            waveshare_ui::apply_chart_style(chart);
+            series = lv_chart_add_series(chart, lv_color_hex(0x5CFF7A), LV_CHART_AXIS_PRIMARY_Y);
+          }
+
+          history.push({{id(local_backup_battery_voltage).state, NAN, NAN}}, millis());
+          for (size_t p = 0; p < history.points; ++p) {
+            const float value = history.at(p, 0);
+            lv_chart_set_value_by_id(chart, series, p,
+              std::isfinite(value) ? static_cast<int32_t>(value * 100) : LV_CHART_POINT_NONE);
+          }
+          lv_chart_set_range(chart, LV_CHART_AXIS_PRIMARY_Y, 300, 430);
+          lv_chart_refresh(chart);
+
+interval:
+  - interval: 10s
+    then:
+      - script.execute: example_render_trend
+
+      - lvgl.label.update:
+          id: ui_header_status
+          text: !lambda |-
+            return std::string(
+              id(native_api).is_connected_with_state_subscription() ? "HA online" : "HA offline"
+            );
+
+lvgl:
+  top_layer:
+    widgets:
+      - button:
+          id: nav_overview
+          x: ${ ui_nav_x0 + 0 * ui_nav_step }
+          y: ${ui_nav_y}
+          styles: style_nav_button
+          widgets:
+            - label:
+                align: CENTER
+                text: "Übersicht"
+          on_short_click:
+            - lvgl.page.show: page_overview
+            - script.execute:
+                id: example_select_page
+                page: 0
+
+      - button:
+          id: nav_trends
+          x: ${ ui_nav_x0 + 1 * ui_nav_step }
+          y: ${ui_nav_y}
+          styles: style_nav_button
+          widgets:
+            - label:
+                align: CENTER
+                text: "Trends"
+          on_short_click:
+            - lvgl.page.show: page_trends
+            - script.execute:
+                id: example_select_page
+                page: 1
+
+      - button:
+          id: nav_settings
+          x: ${ ui_nav_x0 + 2 * ui_nav_step }
+          y: ${ui_nav_y}
+          styles: style_nav_button
+          widgets:
+            - label:
+                align: CENTER
+                text: "Dialog"
+          on_short_click:
+            - lvgl.widget.show: example_dialog
+
+      - button:
+          id: nav_system
+          x: ${ ui_nav_x0 + 3 * ui_nav_step }
+          y: ${ui_nav_y}
+          styles: style_nav_button
+          widgets:
+            - label:
+                align: CENTER
+                text: "System"
+          on_short_click:
+            - lvgl.page.show: page_system
+            - script.execute:
+                id: example_select_page
+                page: 3
+
+      - obj:
+          id: example_dialog
+          x: 0
+          y: 0
+          width: 800
+          height: 480
+          hidden: true
+          clickable: true
+          scrollable: false
+          styles: style_dialog_overlay
+          widgets:
+            - obj:
+                align: CENTER
+                width: 460
+                height: 220
+                styles: style_dialog_panel
+                scrollable: false
+                widgets:
+                  - label:
+                      x: 20
+                      y: 20
+                      text: "Beispieldialog"
+                      text_font: font_24
+                      text_color: 0xFFFFFF
+                  - label:
+                      x: 20
+                      y: 64
+                      width: 420
+                      text: "Modal über dem ganzen Bildschirm, Panel zentriert."
+                      styles: style_desc_label
+                  - button:
+                      x: 300
+                      y: 150
+                      styles: style_dialog_button
+                      widgets:
+                        - label:
+                            align: CENTER
+                            text: "Schließen"
+                      on_short_click:
+                        - lvgl.widget.hide: example_dialog
+
+  pages:
+    - id: page_overview
+      styles: style_page
+      widgets:
+        - obj:
+            x: 10
+            y: 70
+            width: 380
+            height: 160
+            styles: style_card
+            widgets:
+              - label:
+                  x: 20
+                  y: 16
+                  text: "Größen und Farben"
+                  styles: style_title_label
+              - label:
+                  x: 20
+                  y: 60
+                  text: "48 °C"
+                  text_font: font_48
+                  text_color: 0xFFFFFF
+
+    - id: page_trends
+      styles: style_page
+      widgets:
+        - obj:
+            id: example_chart_host
+            x: 10
+            y: 70
+            width: 780
+            height: 330
+            styles: style_card
+
+    - id: page_system
+      styles: style_page
+      widgets:
+        - label:
+            x: 20
+            y: 80
+            text: "Waveshare base v${waveshare_base_version}"
+            styles: style_title_label

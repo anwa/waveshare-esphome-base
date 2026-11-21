@@ -1,0 +1,119 @@
+# ==============================================================================
+# LOCAL BACKUP BATTERY
+# ==============================================================================
+#
+# A 1S lithium battery is connected to the Waveshare J3 battery connector.
+#
+# The board already contains the required voltage divider:
+#
+#   VBAT -> 200 kΩ -> TP1 -> 100 kΩ -> GND
+#
+# TP1 must be externally connected to:
+#
+#   J8 pin 3 / AD -> GPIO6
+#
+# Never connect the battery voltage directly to GPIO6. Without the jumper the
+# ADC value is unreliable and a missing battery cannot be detected reliably.
+#
+# The measurement is local and independent of Home Assistant availability.
+#
+# Required substitutions:
+#   battery_entity_prefix   name prefix, for example "HMI" -> "HMI Battery Voltage"
+#
+# Optional substitutions:
+#   pin_battery_adc         ADC pin connected to TP1 (default GPIO6)
+# ==============================================================================
+
+substitutions:
+  pin_battery_adc: "GPIO6"
+
+sensor:
+  - platform: adc
+    pin: ${pin_battery_adc}
+    id: local_backup_battery_voltage
+    name: "${battery_entity_prefix} Battery Voltage"
+
+    attenuation: 6db
+    update_interval: 5s
+
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    entity_category: diagnostic
+    accuracy_decimals: 2
+    icon: "mdi:battery"
+
+    filters:
+      # Restore the actual battery voltage from the onboard 1:3 divider.
+      - multiply: 3.0
+
+      # Smooth ADC noise while still reacting quickly enough for a battery
+      # monitor. Five 5-second samples represent a 25-second window.
+      - sliding_window_moving_average:
+          window_size: 5
+          send_every: 1
+
+  # ---------------------------------------------------------------------------
+  # VOLTAGE-BASED STATE OF CHARGE
+  # ---------------------------------------------------------------------------
+  #
+  # A lithium cell has a nonlinear voltage/SOC relationship, and its terminal
+  # voltage also depends on charge current, load and relaxation time. The
+  # piecewise curve is intended for local monitoring, not as a fuel gauge.
+  # ---------------------------------------------------------------------------
+
+  - platform: template
+    id: local_backup_battery_soc
+    name: "${battery_entity_prefix} Battery State of Charge"
+
+    unit_of_measurement: "%"
+    device_class: battery
+    state_class: measurement
+    entity_category: diagnostic
+    accuracy_decimals: 0
+    icon: "mdi:battery"
+
+    update_interval: 5s
+
+    lambda: |-
+      const float v = id(local_backup_battery_voltage).state;
+
+      if (std::isnan(v))
+        return NAN;
+
+      // Approximate resting-voltage curve for a 1S Li-ion cell.
+      struct Point {
+        float voltage;
+        float soc;
+      };
+
+      static const Point curve[] = {
+        {3.30f,   0.0f},
+        {3.50f,   5.0f},
+        {3.60f,  10.0f},
+        {3.70f,  25.0f},
+        {3.80f,  45.0f},
+        {3.90f,  65.0f},
+        {4.00f,  80.0f},
+        {4.10f,  90.0f},
+        {4.20f, 100.0f}
+      };
+
+      const size_t count = sizeof(curve) / sizeof(curve[0]);
+
+      if (v <= curve[0].voltage)
+        return 0.0f;
+
+      if (v >= curve[count - 1].voltage)
+        return 100.0f;
+
+      for (size_t i = 1; i < count; i++) {
+        if (v <= curve[i].voltage) {
+          const Point &low = curve[i - 1];
+          const Point &high = curve[i];
+          return low.soc +
+            (v - low.voltage) * (high.soc - low.soc) / (high.voltage - low.voltage);
+        }
+      }
+
+      return NAN;

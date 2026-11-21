@@ -1,0 +1,15 @@
+# ==============================================================================
+# LVGL CHART SUPPORT
+# ==============================================================================
+#
+# Enables the native LVGL chart API. Trend charts are created from C++ through
+# LVGL directly instead of an ESPHome chart widget, so missing readings can stay
+# gaps (LV_CHART_POINT_NONE).
+#
+# The waveshare_ui component provides waveshare_ui::apply_chart_style() for the
+# shared chart look and waveshare_ui::TrendBuffer for a RAM-only history.
+# ==============================================================================
+
+esphome:
+  build_flags:
+    - -DLV_USE_CHART=1
